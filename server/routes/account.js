@@ -1,3 +1,5 @@
+// This file holds all account related routes
+
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');	// JWT: JSON Web Token
 
