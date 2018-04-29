@@ -25,27 +25,8 @@ router.route('/categories')
 		});
 	});
 
-// Not the best practice: What if we got 10,000 products?
-// Shouldn't send all of them to front-end at once.
-router.get('/categories/:id', (req, res, next) => {
-	const perPage = 10;
-	Product.find({ category: req.params.id })	// find all products belong to the specific category
-		.populate('category')
-		.exec((err, products) => {
-			Product.count({ category: req.params.id }, (err, totalProducts) => {
-				res.json({
-					success: true,
-					message: 'category',
-					products: products,
-					categoryName: products[0].category.name,
-					totalProducts: totalProducts,
-					pages: Math.ceil(totalProducts / perPage)
-				});
-			});
-		});
-});
 
-// example: async.waterfall()
+// [For Explanation Only] example: async.waterfall()
 router.get('/waterfall', (req, res, next) => {
 	
 	function number1(callback) {
@@ -59,6 +40,47 @@ router.get('/waterfall', (req, res, next) => {
 	}
 
 	async.waterfall([number1, number2]);	// terminal: Lebron James
+});
+
+// '/categories/:id': find all products belong to the specific category:
+router.get('/categories/:id', (req, res, next) => {
+	const perPage = 10;
+	const page = req.query.page;
+	async.waterfall([
+		// get the total amount of products that belongs to the category
+		function(callback) {
+			Product.count({ category: req.params.id }, (err, count) => {
+				let totalProducts = count;
+				callback(err, totalProducts);	// trigger the next function
+			});
+		},
+		// find all products under the given category
+		function(totalProducts, callback) {
+			Product.find({ category: req.params.id })
+				.skip(perPage * page)	// page index starts from 0, so if 3 pages in total, skip 10 * 2 = 20 
+				.limit(perPage)	// limit to 10 products per query
+				.populate('category')
+				.populate('owner')
+				.exec((err, products) => {
+					if (err) { return next(err); }
+					callback(err, products, totalProducts);
+				});
+		},
+		// get category name
+		// (avoid 0 product under given caregory in previous function, otherwise `products[0]` would be risky)
+		function(products, totalProducts, callback) {
+			Category.findOne({ _id: req.params.id }, (err, category) => {
+				res.json({
+					success: true,
+					message: 'category',
+					products: products,
+					categoryName: category.name,
+					totalProducts: totalProducts,
+					pages: Math.ceil(totalProducts / perPage)
+				});
+			});
+		}
+	]);
 });
 
 module.exports = router;
