@@ -46,7 +46,7 @@ router.get('/waterfall', (req, res, next) => {
 router.get('/categories/:id', (req, res, next) => {
 	const perPage = 10;
 	const page = req.query.page;
-	async.waterfall([
+	async.parallel([
 		// get the total amount of products that belongs to the category
 		function(callback) {
 			Product.count({ category: req.params.id }, (err, count) => {
@@ -55,7 +55,7 @@ router.get('/categories/:id', (req, res, next) => {
 			});
 		},
 		// find all products under the given category
-		function(totalProducts, callback) {
+		function(callback) {
 			Product.find({ category: req.params.id })
 				.skip(perPage * page)	// page index starts from 0, so if 3 pages in total, skip 10 * 2 = 20 
 				.limit(perPage)	// limit to 10 products per query
@@ -63,24 +63,30 @@ router.get('/categories/:id', (req, res, next) => {
 				.populate('owner')
 				.exec((err, products) => {
 					if (err) { return next(err); }
-					callback(err, products, totalProducts);
+					callback(err, products);
 				});
 		},
 		// get category name
 		// (avoid 0 product under given caregory in previous function, otherwise `products[0]` would be risky)
-		function(products, totalProducts, callback) {
+		function(callback) {
 			Category.findOne({ _id: req.params.id }, (err, category) => {
-				res.json({
-					success: true,
-					message: 'category',
-					products: products,
-					categoryName: category.name,
-					totalProducts: totalProducts,
-					pages: Math.ceil(totalProducts / perPage)
-				});
+				callback(err, category)
 			});
 		}
-	]);
+	], function(err, results) {
+		let totalProducts = results[0];
+		let products = results[1];
+		let category = results[2];
+
+		res.json({
+			success: true,
+			message: 'category',
+			products: products,
+			categoryName: category.name,
+			totalProducts: totalProducts,
+			pages: Math.ceil(totalProducts / perPage)
+		});
+	});
 });
 
 module.exports = router;
