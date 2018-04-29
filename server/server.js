@@ -27,5 +27,5 @@ const userRoutes = require('./routes/account');
 app.use('/api/accounts', userRoutes);
 
 app.listen(config.port, err => {
-  console.log('Magic happens on port awesome ' + config.port);
+  console.log('Listening: ' + config.port);
 });
