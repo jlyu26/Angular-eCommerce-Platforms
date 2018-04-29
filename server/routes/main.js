@@ -1,6 +1,7 @@
 // This file holds all product and category related routes
 
 const router = require('express').Router();
+const async = require('async');	// product loading pagination
 const Category = require('../models/category');
 const Product = require('../models/product');
 
@@ -42,6 +43,22 @@ router.get('/categories/:id', (req, res, next) => {
 				});
 			});
 		});
+});
+
+// example: async.waterfall()
+router.get('/waterfall', (req, res, next) => {
+	
+	function number1(callback) {
+		const firstName = 'Lebron';
+		callback(null, firstName);
+	}
+
+	function number2(firstName, callback) {
+		const lastName = 'James';
+		console.log(`${firstName} ${lastName}`);
+	}
+
+	async.waterfall([number1, number2]);	// terminal: Lebron James
 });
 
 module.exports = router;
