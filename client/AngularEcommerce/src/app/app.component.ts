@@ -7,7 +7,6 @@ import { DataService } from './data.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-
 export class AppComponent {
   searchTerm = '';
   isCollapsed = true;
@@ -34,5 +33,10 @@ export class AppComponent {
     this.router.navigate(['']);
   }
 
-  search() {}
+  search() {
+    if (this.searchTerm) {
+      this.collapse();
+      this.router.navigate(['search', { query: this.searchTerm }]);
+    }
+  }
 }

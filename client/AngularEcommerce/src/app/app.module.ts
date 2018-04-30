@@ -25,6 +25,7 @@ import { PostProductComponent } from './post-product/post-product.component';
 import { MyProductsComponent } from './my-products/my-products.component';
 import { CategoryComponent } from './category/category.component';
 import { ProductComponent } from './product/product.component';
+import { SearchComponent } from './search/search.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { ProductComponent } from './product/product.component';
     MyProductsComponent,
     CategoryComponent,
     ProductComponent,
+    SearchComponent,
   ],
   imports: [
     BrowserModule,
