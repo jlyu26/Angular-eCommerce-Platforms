@@ -10,6 +10,13 @@ import { RestApiService } from '../rest-api.service';
   styleUrls: ['./product.component.scss'],
 })
 export class ProductComponent implements OnInit {
+  myReview = {
+    title: '',
+    description: '',
+    rating: 0,
+  };
+  btnDisabled = false;
+
   product: any;
 
   constructor(
@@ -30,5 +37,23 @@ export class ProductComponent implements OnInit {
         })
         .catch(error => this.data.error(error['message']));
     });
+  }
+
+  async postReview() {
+    this.btnDisabled = true;
+    try {
+      const data = await this.rest.post('http://localhost:3030/api/review', {
+        productId: this.product._id,
+        title: this.myReview.title,
+        description: this.myReview.description,
+        rating: this.myReview.rating,
+      });
+      data['success']
+        ? this.data.success(data['message'])
+        : this.data.error(data['message']);
+      this.btnDisabled = false;
+    } catch (error) {
+      this.data.error(error['message']);
+    }
   }
 }

@@ -2,6 +2,7 @@
 
 const router = require('express').Router();
 const async = require('async');	// product loading pagination
+
 const Category = require('../models/category');
 const Product = require('../models/product');
 const Review = require('../models/review');
@@ -101,7 +102,7 @@ router.get('/categories/:id', (req, res, next) => {
 				.limit(perPage)	// limit to 10 products per query
 				.populate('category')
 				.populate('owner')
-				.populate('review')
+				.populate('reviews')
 				.exec((err, products) => {
 					if (err) { return next(err); }
 					callback(err, products);
